@@ -1,4 +1,4 @@
-lights
+Lights
 ======
 
-philips hue control
+Python control of Philips Hue lights
