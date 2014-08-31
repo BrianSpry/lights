@@ -68,6 +68,12 @@ def random_color(length,interval):
         time.sleep(interval)
     change_hue_all(10000)
 
+def change_brightness_all(bri=235):
+    data = json.dumps({'bri':bri})
+    cur_url = '/'.join([BRIX_URL,GROUPS,ALL,ACTION])
+    x = requests.put(cur_url,data=data)
+    print x.text
+
 def create_group(light_group):
     pass
 
