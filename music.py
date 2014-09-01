@@ -2,6 +2,7 @@
 
 from datetime import datetime, timedelta
 from Queue import Queue
+import audioop
 import time
 import wave
 
@@ -17,9 +18,12 @@ window = np.blackman(CHUNK)
 
 MIN_FREQUENCY = 60
 MAX_FREQUENCY = 1800
+MIN_VOLUME = 100
+MAX_VOLUME = 500
 
 last_change_time = datetime.now()
 frequencies_queue = Queue()
+volumes_queue = Queue()
 
 def main():
     p = pyaudio.PyAudio()
@@ -47,6 +51,7 @@ def main():
 def callback(in_data, frame_count, time_info, status):
     global last_change_time
     global frequencies_queue
+    global volumes_queue
 
     # unpack the data and times by the hamming window
     indata = np.array(wave.struct.unpack("%dh"%(len(in_data)/WIDTH), in_data))*window
@@ -67,7 +72,12 @@ def callback(in_data, frame_count, time_info, status):
         frequency = which*RATE/CHUNK
 
     if frequency > MIN_FREQUENCY and frequency < MAX_FREQUENCY:
+        # get volume
+        volume = audioop.rms(in_data, WIDTH)
+        volumes_queue.put(volume)
+
         frequencies_queue.put(frequency)
+
         bri = 235
         sat = 254
         time_now = datetime.now()
@@ -76,21 +86,37 @@ def callback(in_data, frame_count, time_info, status):
             while not frequencies_queue.empty():
                 frequencies.append(frequencies_queue.get())
 
-            current_min = min(frequencies)
-            current_max = max(frequencies)
+            freq_min = min(frequencies)
+            freq_max = max(frequencies)
             try:
-                frequencies.remove(current_min)
-                frequencies.remove(current_max)
+                frequencies.remove(freq_min)
+                frequencies.remove(freq_max)
             except ValueError:
                 pass
 
-            if frequencies:
-                current_avg = sum(frequencies) / float(len(frequencies))
+            volumes = []
+            while not volumes_queue.empty():
+                volumes.append(volumes_queue.get())
 
-                hue = int((current_avg - MIN_FREQUENCY) / float(MAX_FREQUENCY) * 65535)
-                print 'Frequency:', current_avg, 'Hue:', hue
+            vol_min = min(volumes)
+            vol_max = max(volumes)
+            try:
+                volumes.remove(vol_min)
+                volumes.remove(vol_max)
+            except ValueError:
+                pass
 
-                lights.change_hue_single(hue)
+            if frequencies and volumes:
+                freq_avg = sum(frequencies) / float(len(frequencies))
+                vol_avg = sum(volumes) / float(len(volumes))
+
+                hue = int((freq_avg - MIN_FREQUENCY) / float(MAX_FREQUENCY) * 65535)
+                bri = int((vol_avg - MIN_VOLUME) / float(MAX_VOLUME) * 255)
+                if bri < 0: bri = 0
+                if bri > 254: bri = 254
+                print 'Frequency:', freq_avg, 'Hue:', hue, 'Bri:', bri
+
+                lights.change_hue_single(hue=hue, bri=bri)
             last_change_time = time_now
 
     return (in_data, pyaudio.paContinue)

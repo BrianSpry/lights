@@ -57,10 +57,10 @@ def turn_on_all(hue=10000):
     x = requests.put(cur_url, data=data)
     print x.text
 
-def change_hue_single(hue=10000, lights=[CHIEF, KEEF]):
+def change_hue_single(hue=10000, sat=254, bri=254, lights=[CHIEF, KEEF]):
     async_list = []
 
-    data = json.dumps({'hue': hue, 'transitiontime': 3})
+    data = json.dumps({'hue': hue, 'bri': bri, 'transitiontime': 3})
     for light in lights:
         cur_url = '/'.join([BRIX_URL, LIGHTS, str(light), STATE])
 
