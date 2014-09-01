@@ -90,7 +90,7 @@ def callback(in_data, frame_count, time_info, status):
                 hue = int((current_avg - MIN_FREQUENCY) / float(MAX_FREQUENCY) * 65535)
                 print 'Frequency:', current_avg, 'Hue:', hue
 
-                lights.change_hue(hue, 'single')
+                lights.change_hue_single(hue)
             last_change_time = time_now
 
     return (in_data, pyaudio.paContinue)
