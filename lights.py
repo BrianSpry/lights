@@ -1,7 +1,9 @@
-import requests
 import json
 import time
 import random
+
+import requests
+import grequests
 
 API_URL = 'http://192.168.0.100/api/'
 BRIX_URL = 'http://192.168.0.100/api/1brixsprix'
@@ -46,11 +48,19 @@ def turn_on_all(hue=10000):
     x = requests.put(cur_url,data=data)
     print x.text
 
-def change_hue_all(hue=10000):
-    data = json.dumps({'hue':hue})
-    cur_url = '/'.join([BRIX_URL,GROUPS,ALL,ACTION])
-    x = requests.put(cur_url,data=data)
-    print x.text
+def change_hue(hue=10000, single_or_group='single', lights=[1,3]):
+    async_list = []
+
+    data = json.dumps({'hue': hue, 'transitiontime': 3})
+    for light in lights:
+        if single_or_group == 'single':
+            cur_url = '/'.join([BRIX_URL, LIGHTS, str(light), STATE])
+        else:
+            cur_url = '/'.join([BRIX_URL, GROUPS, str(light), STATE])
+
+        item = grequests.put(cur_url, data=data)
+        async_list.append(item)
+    grequests.map(async_list)
 
 def turn_off_all():
     data = json.dumps({'on':False})
