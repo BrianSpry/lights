@@ -18,43 +18,49 @@ ACTION = 'action'
 CONFIG = 'config'
 
 def get_on_status(light):
-    cur_url = '/'.join([BRIX_URL,LIGHTS,light])
+    cur_url = '/'.join([BRIX_URL, LIGHTS, light])
     print cur_url
     return json.loads(requests.get(cur_url).text)['state']['on']
 
 def get_config():
-    cur_url = '/'.join(BRIX_URL,CONFIG)
+    cur_url = '/'.join(BRIX_URL, CONFIG)
     return json.loads(requests.get(cur_url).text)
 
 def get_all_lights():
-    cur_url = '/'.join([BRIX_URL,LIGHTS])
+    cur_url = '/'.join([BRIX_URL, LIGHTS])
     return json.loads(requests.get(cur_url).text)
 
 def turn_on_light(light):
     data = json.dumps({'on':True})
-    cur_url = '/'.join([BRIX_URL,LIGHTS,light,STATE])
+    cur_url = '/'.join([BRIX_URL, LIGHTS, light, STATE])
     x = requests.put(cur_url, data=data)
+
+def change_hue_light(light, hue):
+    data = json.dumps({'hue': hue})
+    cur_url = '/'.join([BRIX_URL, LIGHTS, light, STATE])
+    x = requests.put(cur_url, data=data)
+    print x.text
 
 def turn_off_light(light):
     data = json.dumps({'on':False})
-    cur_url = '/'.join([BRIX_URL,LIGHTS,light,STATE])
+    cur_url = '/'.join([BRIX_URL, LIGHTS, light, STATE])
     x = requests.put(cur_url, data=data)
 
 def turn_on_all(hue=10000):
     data = json.dumps({'on':True,'hue':hue})
-    cur_url = '/'.join([BRIX_URL,GROUPS,ALL,ACTION])
+    cur_url = '/'.join([BRIX_URL, GROUPS, ALL, ACTION])
     x = requests.put(cur_url,data=data)
     print x.text
 
 def change_hue_all(hue=10000):
     data = json.dumps({'hue':hue})
-    cur_url = '/'.join([BRIX_URL,GROUPS,ALL,ACTION])
+    cur_url = '/'.join([BRIX_URL, GROUPS, ALL, ACTION])
     x = requests.put(cur_url,data=data)
     print x.text
 
 def turn_off_all():
     data = json.dumps({'on':False})
-    cur_url = '/'.join([BRIX_URL,GROUPS,ALL,ACTION])
+    cur_url = '/'.join([BRIX_URL, GROUPS, ALL, ACTION])
     x = requests.put(cur_url,data=data)
     print x.text
 
@@ -70,7 +76,19 @@ def random_color(length,interval):
 
 def change_brightness_all(bri=235):
     data = json.dumps({'bri':bri})
-    cur_url = '/'.join([BRIX_URL,GROUPS,ALL,ACTION])
+    cur_url = '/'.join([BRIX_URL, GROUPS, ALL, ACTION])
+    x = requests.put(cur_url,data=data)
+    print x.text
+
+def change_brightness_all(bri=235):
+    data = json.dumps({'bri':bri})
+    cur_url = '/'.join([BRIX_URL, GROUPS, ALL, ACTION])
+    x = requests.put(cur_url,data=data)
+    print x.text
+
+def change_saturation_all(sat=255):
+    data = json.dumps({'sat':sat})
+    cur_url = '/'.join([BRIX_URL, GROUPS, ALL, ACTION])
     x = requests.put(cur_url,data=data)
     print x.text
 
