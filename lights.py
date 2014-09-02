@@ -90,6 +90,17 @@ def random_color(length,interval):
         time.sleep(interval)
     change_hue_all(10000)
 
+def change_brightness_single(bri=235, lights=[CHIEF, KEEF]):
+    async_list = []
+
+    data = json.dumps({'bri': bri})
+    for light in lights:
+        cur_url = '/'.join([BRIX_URL, LIGHTS, str(light), STATE])
+
+        item = grequests.put(cur_url, data=data)
+        async_list.append(item)
+    grequests.map(async_list)
+
 def change_brightness_all(bri=235):
     data = json.dumps({'bri': bri})
     cur_url = '/'.join([BRIX_URL, GROUPS, ALL, ACTION])
